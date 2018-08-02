@@ -11,8 +11,12 @@
 
 int main(int argc, char *argv[]) {
 	vector<int> solution;
+	char fileName1[80];
+	strcpy(fileName1, argv[1]);
+	strcat(fileName1, ".probsat");
+	cout<< fileName1;
 	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
-	fp1.open(argv[1],std::ios::in);
+	fp1.open(fileName1,std::ios::in);
 	if(!fp1.is_open()){
 		perror("read file1 fails");
 		exit(EXIT_FAILURE);
@@ -43,7 +47,7 @@ int main(int argc, char *argv[]) {
 
 	//get solution
 	char fileName[80];
-	strcpy(fileName, argv[2]);
+	strcpy(fileName, argv[1]);
 	strcat(fileName, ".ct");
     outFP.open(fileName,std:: ios::out);
 	if(!outFP.is_open()){
@@ -56,7 +60,7 @@ int main(int argc, char *argv[]) {
 	}
 	outFP<<endl;
 	cout<< "A";
-	fp2.open(argv[2],std::ios::in);
+	fp2.open(argv[1],std::ios::in);
 	if(!fp2.is_open()){
 		perror("read file2 fails");
 		exit(EXIT_FAILURE);
@@ -77,7 +81,6 @@ int main(int argc, char *argv[]) {
 	}
 	fp2.close();
 	outFP.close();
-
 	return 0;
 }
 
