@@ -27,6 +27,7 @@ int main(int argc, char *argv[]) {
 	while(true){
 		getline(fp1,buff);
 		if(buff.empty()){
+			if(fp1.eof()) break;
 			continue;
 		}
 		head =buff.at(0);
