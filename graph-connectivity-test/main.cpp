@@ -45,7 +45,17 @@ void readFile_1(){
 	// strat read
 	char head;
 	getline(fp1,buff);
-	// Get the p line
+	// Get the s line
+	assign.push_back(false);
+	while(!fp1.eof()){
+			if(buff.empty()) break;
+			head =buff.at(0);
+			if(head == 's'){
+				setAssignment(buff);
+				break;
+			}
+			getline(fp1,buff);
+	}
 	while(!fp1.eof()){
 		//cout<<buff<<endl;
 		//todo:parseLine
@@ -62,16 +72,6 @@ void readFile_1(){
 		}
 	  getline(fp1,buff);
 	}
-	assign.push_back(false);
-	while(!fp1.eof()){
-			if(buff.empty()) break;
-			head =buff.at(0);
-			if(head == 's'){
-				setAssignment(buff);
-				break;
-			}
-			getline(fp1,buff);
-	}
 }
 
 void readFile_2(){
@@ -79,6 +79,15 @@ void readFile_2(){
 	char head;
 	getline(fp2,buff);
 	// Get the p line
+	while(!fp2.eof()){
+			if(buff.empty()) break;
+			head =buff.at(0);
+			if(head == 's'){
+				setAssignment(buff);
+				break;
+			}
+			getline(fp2,buff);
+	}
 	while(!fp2.eof()){
 		//cout<<buff<<endl;
 		//todo:parseLine
@@ -98,15 +107,6 @@ void readFile_2(){
 			break;
 		}
 	  getline(fp2,buff);
-	}
-	while(!fp2.eof()){
-			if(buff.empty()) break;
-			head =buff.at(0);
-			if(head == 's'){
-				setAssignment(buff);
-				break;
-			}
-			getline(fp2,buff);
 	}
 	outFP<< 's';
 	for(int i =1; i < numV; i++){
@@ -206,7 +206,7 @@ void getClauses(int i){
 				flag = false;
 				if(*token== '-'){
 					lit = -atoi(token);
-					outFP<<-(lit+numV1) << ' ';
+					outFP<<-(lit+numV1-1) << ' ';
 					token = strtok(NULL, s);
 					continue;
 				}
@@ -218,7 +218,7 @@ void getClauses(int i){
 				}
 				if(flag) break;
 				lit = atoi(token);
-				outFP<<lit+numV1 << ' ';
+				outFP<<lit+numV1-1 << ' ';
 				token = strtok(NULL, s);
 			 }
 		}
@@ -266,6 +266,7 @@ void testLine(string line){
 		}
 		if(*token == '0'){
 			if(numT == 0){
+				cout<<line<<endl;
 				perror("TEST FAILURE");
 				exit(EXIT_FAILURE);
 			}
