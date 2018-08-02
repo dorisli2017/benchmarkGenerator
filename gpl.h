@@ -47,7 +47,9 @@ int* posOc;
 int* negOc;
 int maxOcc;
 vector<int> clauseT;
-vector <bool> assignG;
+vector <int> assign1;// for solve p0 and c (no 1)
+vector <int> assign2;// for solve p1 and c (no 0)
+vector <int> assignG;// for solve p1 and c (no 0)
 
 bool sat = false;
 
@@ -71,8 +73,8 @@ int getFlipCandidate_wa(int cIndex);
 int getFlipCandidate_max(int cIndex);
 void printVector(vector<int>& vec);
 void printUsage();
-void test(bool f0, bool f1, bool fc,vector<bool>& assignment);
-void testLine(string line,vector<bool>& assign);
+void test(bool f0, bool f1, bool fc,vector<int>& assignment);
+void testLine(string line,vector<int>& assign);
 bool satis();
 int setConflict(vector<bool>& assign);
 void  part();

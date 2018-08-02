@@ -14,7 +14,11 @@
 #include <vector>
 #include <iostream>
 #include <set>
+#include <assert.h>
+#include <iterator>
+#include <algorithm>
 using namespace std;
+string fileName;
 ifstream fp1;// File 1 with assignment
 ifstream fp2;// File 2 with assignment
 string l = "-";
@@ -29,20 +33,23 @@ float alpha2;// percentage of cut variables of P2 variables.
 float alpha3;// percentage cut clauses in all clauses
 ofstream outFP;
 string buff;
-bool* assign1;
-set<int> inter1;
-set<int> inter2;
+vector<bool> assign;
+set<int> inter;
 int is1;
 int is2;
 int ics;
-bool* assign2;
+int seed = 1000;
+int numI = 3;
 const char s[2] = " ";
 void readFile_1();
 void readFile_2();
 void combineFile();
-void setAssignment(string buff, bool* assign);
+void setAssignment(string buff);
 void getClauses(int i);
+void setIntersection();
 void readIntersection();
+void testLine(string line);
+void test();
 
 
 

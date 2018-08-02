@@ -10,24 +10,13 @@ int main(int argc, char *argv[]){
 	fileName = argv[1];
 	part();
 	readFile();
-	#pragma omp parallel num_threads(2)
-	{
-		int tid = omp_get_thread_num();
-		const vector<bool>setB = setBB[tid];
-		const vector<int> setI =setII[tid];
-		const vector<double>& setD = setDD[tid];
-		Process process(setB, setI,setD);
-		while(!satis()){
-			#pragma omp barrier
-			if(tid == 0){
-				process.optimal(true, false, true);
-			}
-			if(tid == 1){
-				process.optimal(false,true , true);
-			}
-			process.combineR();
-			#pragma omp barrier
-		}
+	const vector<bool>setB = setBB[0];
+	const vector<int> setI =setII[0];
+	const vector<double>& setD = setDD[0];
+	Process process(setB, setI,setD);
+	while(true){
+		process.optimal(true, false, true);
+		process.optimal(false,true , true);
 		cout<< "SATIS";
 		test(true, true, true, assignG);
 		abort();
@@ -66,19 +55,9 @@ void Process::debugAssign(){
 }
 Process::Process(const vector<bool>& setB, const vector<int>& setI,const vector<double>& setD){
 	parseOptions(setB, setI,setD);
-	tid = omp_get_thread_num();
-	if(tid == 0){
-		distribution0 = uniform_int_distribution<int>(0,INT_MAX);
-		generator0.seed(seed);
-		randINT = &Process::randI0;
-	}
-	else {
-		distribution1 = uniform_int_distribution<int>(0,INT_MAX);
-		generator1.seed(seed);
-		randINT = &Process::randI1;
-	}
-	//set the parameters
-	   // set tabuS
+	distribution0 = uniform_int_distribution<int>(0,INT_MAX);
+	generator0.seed(seed);
+	randINT = &Process::randI0;
 	if(tabu_flag){
 		tabuS = (int*) malloc(sizeof(int) * numVs);
 		for(int i = 0; i < numVs; i++){
@@ -173,6 +152,8 @@ void memAllocate(string buff){
 	}
 	clauseT.reserve(numVs);
 	assignG.reserve(numVs);
+	assign1.reserve(numVs);
+	assign2.reserve(numVs);
 }
 void parseLine(string line,int indexC){
 	char* str = strdup(line.c_str());
@@ -323,12 +304,16 @@ void initialAssignment(){
 		}
 	}
 	for(int i = 0; i < numVs; i++){
-			if(posOc[i] > negOc[i]){
-				assignG.push_back(true);
-			}
-			else{
-				assignG.push_back(false);
-			}
+		if(vs[i] >=2){
+			assignG.push_back(-1);
+			break;
+		}
+		if(posOc[i] > negOc[i]){
+			assignG.push_back(1);
+		}
+		else{
+			assignG.push_back(0);
+		}
 	}
 }
 void Process::biasAssignment(){
@@ -472,9 +457,7 @@ void Process::flip(int literal){
 		assign[-literal]= false;
 	}
 }
-void test(bool f0, bool f1, bool fc,vector<bool>& assign){
-#pragma omp critical
-{
+void test(bool f0, bool f1, bool fc,vector<int>& assign){
 	ifstream fp;
 	fp.open(fileName,std::ios::in);
 	if(!fp.is_open()){
@@ -506,8 +489,7 @@ void test(bool f0, bool f1, bool fc,vector<bool>& assign){
    	}
    	cout<< "tested" << endl;
 }
-}
-void testLine(string line,vector<bool>& assign){
+void testLine(string line,vector<int>& assign){
 	char* str = strdup(line.c_str());
     const char s[2] = " ";
     int lit;
@@ -554,11 +536,14 @@ double Process::func_poly(int literal){
 	return pow((eps+computeBreakScore(literal)),-cb);
 }
 void Process::search_prob(){
+	int size = unsatCs.size();
 	int randC = (this->*randINT)()%unsatCs.size();
 	int flipCindex = unsatCs[randC];
-	if(numP[flipCindex] > 0){
+	while(numP[flipCindex] > 0){
 		unsatCs[randC]=unsatCs.back();
 		unsatCs.pop_back();
+		randC = (this->*randINT)()%unsatCs.size();
+		flipCindex = unsatCs[randC];
 		return;
 	}
 	int flipLindex = getFlipLiteral(flipCindex);

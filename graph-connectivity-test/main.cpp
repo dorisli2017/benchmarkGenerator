@@ -8,6 +8,8 @@
 
 int main(int argc, char *argv[])
 {
+	seed = atof(argv[6]);
+	srand (seed);
 	fp1.open(argv[1],std::ios::in);
 	if(!fp1.is_open()){
 		perror("read file1 fails");
@@ -21,7 +23,8 @@ int main(int argc, char *argv[])
 	alpha1 = atof(argv[3]);
 	alpha2 = atof(argv[4]);
 	alpha3 = atof(argv[5]);
-	outFP.open((string(argv[1])+ l + string(argv[2])).c_str(),std:: ios::out);
+	fileName = (string(argv[1])+ l + string(argv[2])).c_str();
+	outFP.open(fileName,std:: ios::out);
 	if(!outFP.is_open()){
 		perror("write file fails");
 				exit(EXIT_FAILURE);
@@ -30,16 +33,13 @@ int main(int argc, char *argv[])
 	outFP.close();
 	fp1.close();
 	fp2.close();
+	test();
 }
 // append
 void combineFile(){
 	readFile_1();
 	readFile_2();
 	readIntersection();
-
-	outFP<<endl<<"p "<< numV-2 << ' '<< numC;
-
-
 }
 void readFile_1(){
 	// strat read
@@ -58,29 +58,20 @@ void readFile_1(){
 			numV1 = atoi(strtok(NULL, s))+1;
 			is1 = numV1* alpha1;
 			numC1 = atoi(strtok(NULL, s));
-			assign1= (bool*)malloc(sizeof(bool) * numV1);
-			for(int i =0; i < numV1; i++){
-				assign1[i] = 0;
-			}
 			break;
 		}
 	  getline(fp1,buff);
 	}
-
+	assign.push_back(false);
 	while(!fp1.eof()){
 			if(buff.empty()) break;
 			head =buff.at(0);
 			if(head == 's'){
-				setAssignment(buff,assign1);
-				for(int i =0; i < numV1; i++){
-					cout<< assign1[i];
-				}
-				cout<<endl;
+				setAssignment(buff);
 				break;
 			}
 			getline(fp1,buff);
 	}
-	getClauses(1);
 }
 
 void readFile_2(){
@@ -97,17 +88,13 @@ void readFile_2(){
 			char* str = strdup(buff.c_str());
 	    	strtok(str, s);
 			strtok(NULL, s);
-			numV2 = atoi(strtok(NULL, s))+1;
+			numV2 = atoi(strtok(NULL, s));
 			is2 = numV2* alpha2;
 			numC2 = atoi(strtok(NULL, s));
 			numV = numV1+numV2;
 			numC = numC1+numC2;
 			ics = alpha3* numC;
-			//cout<< "is1 "<< is1 << " is2 "<< is2 << " ics "<< ics<<endl;
-			assign2= (bool*)malloc(sizeof(bool) * numV2);
-			for(int i =0; i < numV2; i++){
-				assign2[i] = 0;
-			}
+			setIntersection();
 			break;
 		}
 	  getline(fp2,buff);
@@ -116,35 +103,84 @@ void readFile_2(){
 			if(buff.empty()) break;
 			head =buff.at(0);
 			if(head == 's'){
-				setAssignment(buff,assign2);
-				for(int i =0; i < numV1; i++){
-					cout<< assign2[i];
-				}
-				cout<<endl;
+				setAssignment(buff);
 				break;
 			}
 			getline(fp2,buff);
 	}
+	outFP<< 's';
+	for(int i =1; i < numV; i++){
+		outFP <<' '<< assign[i];
+	}
+	outFP<<endl<<"p "<< numV-1 << ' '<< numC+ics<<endl;
+	getClauses(1);
 	getClauses(2);
 }
 
-void setAssignment(string buff, bool* assign){
+void setAssignment(string buff){
 	char* str = strdup(buff.c_str());
 	char* token = strtok(str, s);
 	 token = strtok(NULL, s);
 	 while(token != NULL){
-		 assign[atoi(token)] = 1;
+		 if(*token== '-'){
+			 assign.push_back(false);
+		 }
+		 else assign.push_back(true);
 		 token = strtok(NULL, s);
 	 }
 };
 
+void setIntersection(){
+	while(inter.size() != is1){
+		int c = rand()% numV1;
+		if(c== 0) continue;
+		inter.insert(c);
+	}
+	int is = is1+is2;
+	while(inter.size() != is){
+		inter.insert((rand()% numV2)+numV1);
+	}
+	outFP<<'i';
+	 for (int const& iv : inter)
+	    {
+	        outFP <<' '<<iv;
+	    }
+	 outFP<< endl;
+}
 void readIntersection(){
-	while(inter1.size() != is1){
-		inter1.insert(rand()% is1);
-	}
-	while(inter2.size() != is2){
-		inter2.insert(rand()% is2);
-	}
+	int is = is1+is2;
+	 set<int> m;
+	 vector<bool> sign;
+	 int nump = 0;
+	 int i = 0;
+	 while(i < ics){
+		 while(m.size() < numI){
+			 set<int>::iterator it = inter.begin();
+			advance(it,rand()%is);
+			int c = *it;
+			m.insert(c);
+		 }
+		for (int const& v :m)
+		{
+			bool c = (rand()%2 == 1);
+			sign.push_back(c);
+			if(c == assign[v]) nump++;
+		}
+		 if(nump > 0){
+			 set<int>::iterator itm = m.begin();
+			 for(int j =0; j < numI; j++){
+				bool si = sign[j];
+				if(si) outFP<< *itm<< ' ';
+				else  outFP<< -*itm<< ' ';
+				advance(itm,1);
+			 }
+			 outFP<<"0"<<endl;
+			 i++;
+		 }
+		 sign.clear();
+		 nump = 0;
+		 m.clear();
+	 }
 }
 
 void getClauses(int i){
@@ -152,6 +188,7 @@ void getClauses(int i){
 		int line = 0;
 		while(!fp1.eof() && line < numC1){
 			getline(fp1,buff);
+			if(buff.empty()) break;
 			outFP<<buff<< endl;
 		}
 	}
@@ -185,8 +222,62 @@ void getClauses(int i){
 				token = strtok(NULL, s);
 			 }
 		}
-
 	}
+}
+
+void test(){
+	ifstream fp;
+	fp.open(fileName,std::ios::in);
+	if(!fp.is_open()){
+		perror("read file fails");
+		exit(EXIT_FAILURE);
+	}
+	string buff;
+	char head;
+   	getline(fp,buff);
+   	while(!fp.eof()){
+   		if(buff.empty()) break;
+		head =buff.at(0);
+		if(head == 'p'){
+			break;
+		}
+	  getline(fp,buff);
+	}
+   	while(!fp.eof()){
+		getline(fp,buff);
+		if(buff.empty()) break;
+		testLine(buff);
+   	}
+   	cout<< "tested" << endl;
+}
+
+void testLine(string line){
+	char* str = strdup(line.c_str());
+    const char s[2] = " ";
+    int lit;
+    int numT=0;
+    char* token = strtok(str, s);
+    while(token != NULL){
+		if(*token== '-'){
+			lit = atoi(token);
+			if(assign[-lit] == false) numT++;
+			token = strtok(NULL, s);
+			continue;
+		}
+		if(*token == '0'){
+			if(numT == 0){
+				perror("TEST FAILURE");
+				exit(EXIT_FAILURE);
+			}
+		    return;
+		}
+		lit = atoi(token);
+		if(assign[lit] == true) numT++;
+		token = strtok(NULL, s);
+    }
+	perror("a clause line does not terminates");
+	exit(EXIT_FAILURE);
+
 }
 
 
