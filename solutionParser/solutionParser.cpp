@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 	vector<int> solution;
 	char fileName1[80];
 	strcpy(fileName1, argv[1]);
-	strcat(fileName1, ".probsat");
+	strcat(fileName1, ".yalsat");
 	cout<< fileName1;
 	//cout << "!!!Hello World!!!" << endl; // prints !!!Hello World!!!
 	fp1.open(fileName1,std::ios::in);
