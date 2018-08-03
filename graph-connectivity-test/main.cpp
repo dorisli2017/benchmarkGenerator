@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 	a.erase (0,23);
 	string b = string(argv[2]);
 	b.erase (0,23);
-	fileName = (a+ l + b +l + string(argv[3])+
+	fileName = ("../../combine/"+a+ l + b +l + string(argv[3])+
 			l + string(argv[4])+l + string(argv[5])+l + string(argv[6])).c_str();
 	outFP.open(fileName,std:: ios::out);
 	if(!outFP.is_open()){
@@ -272,12 +272,12 @@ void test(){
 	  getline(fp,buff);
 	}
    	while(!fp.eof()){
-   		i++;
 		getline(fp,buff);
 		if(buff.empty()) break;
+   		i++;
 		testLine(buff);
    	}
-   	assert(i = numC+ics);
+   	assert(i == numC+ics);
    	cout<< "tested" << endl;
    	fp.close();
 }
