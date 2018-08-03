@@ -23,10 +23,15 @@ int main(int argc, char *argv[])
 	alpha1 = atof(argv[3]);
 	alpha2 = atof(argv[4]);
 	alpha3 = atof(argv[5]);
-	fileName = (string(argv[1])+ l + string(argv[2])).c_str();
+	string a = string(argv[1]);
+	a.erase (0,23);
+	string b = string(argv[2]);
+	b.erase (0,23);
+	fileName = (a+ l + b +l + string(argv[3])+
+			l + string(argv[4])+l + string(argv[5])+l + string(argv[6])).c_str();
 	outFP.open(fileName,std:: ios::out);
 	if(!outFP.is_open()){
-		perror("write file fails");
+		perror("write file fails!!!");
 				exit(EXIT_FAILURE);
 	}
 	combineFile();
@@ -114,6 +119,7 @@ void readFile_2(){
 		else outFP <<' '<< -i;
 	}
 	outFP<<endl<<"p "<< numV-1 << ' '<< numC+ics<<endl;
+
 	getClauses(1);
 	getClauses(2);
 }
@@ -201,6 +207,7 @@ void readIntersection(){
 		 last = 0;
 		 m.clear();
 	 }
+	 assert(i == ics);
 }
 
 void getClauses(int i){
@@ -247,6 +254,7 @@ void getClauses(int i){
 
 void test(){
 	ifstream fp;
+	int i = 0;
 	fp.open(fileName,std::ios::in);
 	if(!fp.is_open()){
 		perror("read file fails");
@@ -264,10 +272,12 @@ void test(){
 	  getline(fp,buff);
 	}
    	while(!fp.eof()){
+   		i++;
 		getline(fp,buff);
 		if(buff.empty()) break;
 		testLine(buff);
    	}
+   	assert(i = numC+ics);
    	cout<< "tested" << endl;
    	fp.close();
 }
