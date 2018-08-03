@@ -110,7 +110,8 @@ void readFile_2(){
 	}
 	outFP<< 's';
 	for(int i =1; i < numV; i++){
-		outFP <<' '<< assign[i];
+		if(assign[i]) outFP <<' '<< i;
+		else outFP <<' '<< -i;
 	}
 	outFP<<endl<<"p "<< numV-1 << ' '<< numC+ics<<endl;
 	getClauses(1);
@@ -153,11 +154,26 @@ void readIntersection(){
 	 vector<bool> sign;
 	 int nump = 0;
 	 int i = 0;
+	 int change = 0;
+	 int last = 0;
+	 set<int>::iterator it;
 	 while(i < ics){
 		 while(m.size() < numI){
-			 set<int>::iterator it = inter.begin();
+			it = inter.begin();
 			advance(it,rand()%is);
 			int c = *it;
+			if(last == 0){
+				if(c >= numV1) last = 2;
+				else last = 1;
+			}
+			if(c >= numV1 && last == 1){
+				last = 2;
+				change++;
+			}
+			if(c < numV1 && last == 2){
+				last = 1;
+				change++;
+			}
 			m.insert(c);
 		 }
 		for (int const& v :m)
@@ -166,7 +182,9 @@ void readIntersection(){
 			sign.push_back(c);
 			if(c == assign[v]) nump++;
 		}
-		 if(nump > 0){
+		 if(nump > 0 && change > 0){
+			 assert(*m.rbegin()>= numV1);
+			 assert(*m.begin()< numV1);
 			 set<int>::iterator itm = m.begin();
 			 for(int j =0; j < numI; j++){
 				bool si = sign[j];
@@ -179,6 +197,8 @@ void readIntersection(){
 		 }
 		 sign.clear();
 		 nump = 0;
+		 change = 0;
+		 last = 0;
 		 m.clear();
 	 }
 }
@@ -249,6 +269,7 @@ void test(){
 		testLine(buff);
    	}
    	cout<< "tested" << endl;
+   	fp.close();
 }
 
 void testLine(string line){
