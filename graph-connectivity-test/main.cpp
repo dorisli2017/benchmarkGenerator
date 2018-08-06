@@ -44,7 +44,6 @@ int main(int argc, char *argv[])
 void combineFile(){
 	readFile_1();
 	readFile_2();
-	readIntersection();
 }
 void readFile_1(){
 	// strat read
@@ -113,14 +112,14 @@ void readFile_2(){
 		}
 	  getline(fp2,buff);
 	}
-	outFP<< 's';
+	/*outFP<< 's';
 	for(int i =1; i < numV; i++){
 		if(assign[i]) outFP <<' '<< i;
 		else outFP <<' '<< -i;
-	}
-	outFP<<endl<<"p "<< numV-1 << ' '<< numC+ics<<endl;
+	}*/
 
 	getClauses(1);
+	readIntersection();
 	getClauses(2);
 }
 
@@ -147,6 +146,7 @@ void setIntersection(){
 	while(inter.size() != is){
 		inter.insert((rand()% numV2)+numV1);
 	}
+	outFP<<"p "<< numV-1 << ' '<<numV1-1<< ' ' << numC+ics<< ' '<< numC1<< ' '<< numC1+ics<<endl;
 	outFP<<'i';
 	 for (int const& iv : inter)
 	    {
@@ -266,7 +266,7 @@ void test(){
    	while(!fp.eof()){
    		if(buff.empty()) break;
 		head =buff.at(0);
-		if(head == 'p'){
+		if(head == 'i'){
 			break;
 		}
 	  getline(fp,buff);
@@ -307,6 +307,7 @@ void testLine(string line){
 		if(assign[lit] == true) numT++;
 		token = strtok(NULL, s);
     }
+    cout<< line;
 	perror("a clause line does not terminates");
 	exit(EXIT_FAILURE);
 
