@@ -188,15 +188,24 @@ void readIntersection(){
 			sign.push_back(c);
 			if(c == assign[v]) nump++;
 		}
-		 if(nump > 0 && change > 0){
+		 if(change > 0){
 			 assert(*m.rbegin()>= numV1);
 			 assert(*m.begin()< numV1);
+			 if(nump == 0){
+				 int flip = rand()%numI;
+				 for(int i =0 ; i < numI; i++){
+					 if(i == flip) continue;
+					 sign[i] =  (rand()%2 == 1);
+				 }
+				 if(sign[flip]) sign[flip]= false;
+				 else sign[flip]= true;
+			 }
 			 set<int>::iterator itm = m.begin();
 			 for(int j =0; j < numI; j++){
-				bool si = sign[j];
-				if(si) outFP<< *itm<< ' ';
-				else  outFP<< -*itm<< ' ';
-				advance(itm,1);
+				 bool si = sign[j];
+				 if(si) outFP<< *itm<< ' ';
+				 else  outFP<< -*itm<< ' ';
+				 advance(itm,1);
 			 }
 			 outFP<<"0"<<endl;
 			 i++;
