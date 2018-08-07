@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
 	alpha2 = atof(argv[4]);
 	alpha3 = atof(argv[5]);
 	string a = string(argv[1]);
-	a.erase (0,23);
+	a.erase (0,32);
 	string b = string(argv[2]);
-	b.erase (0,23);
+	b.erase (0,32);
 	fileName = ("../../combine/"+a+ l + b +l + string(argv[3])+
 			l + string(argv[4])+l + string(argv[5])+l + string(argv[6])).c_str();
 	outFP.open(fileName,std:: ios::out);
