@@ -287,7 +287,8 @@ void test(){
 		testLine(buff);
    	}
    	assert(i == numC+ics);
-   	cout<< "tested" << endl;
+   	fileName.erase(0,14);
+   	cout<<fileName <<" tested" << endl;
    	fp.close();
 }
 
