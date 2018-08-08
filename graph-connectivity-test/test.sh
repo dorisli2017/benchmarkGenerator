@@ -12,7 +12,7 @@ do
 	    do
 	        for s in 1 #100 1000 20 200 2000
 		do
-		    timeout 5m /usr/bin/time -f "wtime=%e" ./con "${im1_files[i]}" "${im2_files[i]}" $k $l $m $s 
+		    ./con "${im1_files[i]}" "${im2_files[i]}" $k $l $m $s 500
 		done
 	    done
 	done
