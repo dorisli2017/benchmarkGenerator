@@ -35,6 +35,8 @@ int main(int argc, char *argv[]) {
 				exit(EXIT_FAILURE);
 	}
 	readFile_1();
+	outFP.close();
+	fp1.close();
 	return 0;
 }
 

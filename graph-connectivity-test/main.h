@@ -36,6 +36,7 @@ ofstream outFP;
 string buff;
 vector<bool> assign;
 set<int> inter;
+set<int> realinter;
 int is1;
 int is2;
 int ics;

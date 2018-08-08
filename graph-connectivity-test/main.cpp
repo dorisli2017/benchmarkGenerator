@@ -124,7 +124,7 @@ void readFile_2(){
 	getClauses(2);
 	outFP<<"p "<< numVs-1 << ' '<<numV1-1<< ' ' << numCs<< ' '<< numC1<< ' '<< numC1+ics<<endl;
 	outFP<<'c';
-	 for (int const& iv : inter)
+	 for (int const& iv : realinter)
 	    {
 	        outFP <<' '<<iv;
 	    }
@@ -208,8 +208,14 @@ void readIntersection(){
 			 for(int j =0; j < numI; j++){
 				 bool si = sign[j];
 				 int v = *itm;
-				 if(si) clauseT.push_back(v);
-				 else  clauseT.push_back(-v);
+				 if(si){
+					 clauseT.push_back(v);
+					 realinter.insert(v);
+				 }
+				 else{
+					 clauseT.push_back(-v);
+					 realinter.insert(v);
+				 }
 				 advance(itm,1);
 			 }
 			 clauses.push_back(clauseT);
