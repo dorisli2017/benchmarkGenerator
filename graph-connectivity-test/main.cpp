@@ -23,6 +23,7 @@ int main(int argc, char *argv[])
 	alpha1 = atof(argv[3]);
 	alpha2 = atof(argv[4]);
 	alpha3 = atof(argv[5]);
+	timeLimit = atof(argv[7]);
 	string a = string(argv[1]);
 	a.erase (0,32);
 	string b = string(argv[2]);
@@ -104,9 +105,9 @@ void readFile_2(){
 			numV2 = atoi(strtok(NULL, s));
 			is2 = numV2* alpha2;
 			numC2 = atoi(strtok(NULL, s));
-			numV = numV1+numV2;
-			numC = numC1+numC2;
-			ics = alpha3* numC;
+			numVs = numV1+numV2;
+			numCs = numC1+numC2;
+			ics = alpha3* numCs;
 			setIntersection();
 			break;
 		}
@@ -121,6 +122,14 @@ void readFile_2(){
 	getClauses(1);
 	readIntersection();
 	getClauses(2);
+	outFP<<"p "<< numVs-1 << ' '<<numV1-1<< ' ' << numCs<< ' '<< numC1<< ' '<< numC1+ics<<endl;
+	outFP<<'i';
+	 for (int const& iv : inter)
+	    {
+	        outFP <<' '<<iv;
+	    }
+	 outFP<< endl;
+	printClauses();
 }
 
 void setAssignment(string buff){
@@ -146,15 +155,9 @@ void setIntersection(){
 	while(inter.size() != is){
 		inter.insert((rand()% numV2)+numV1);
 	}
-	outFP<<"p "<< numV-1 << ' '<<numV1-1<< ' ' << numC+ics<< ' '<< numC1<< ' '<< numC1+ics<<endl;
-	outFP<<'i';
-	 for (int const& iv : inter)
-	    {
-	        outFP <<' '<<iv;
-	    }
-	 outFP<< endl;
 }
 void readIntersection(){
+	clock_t tStart = clock();
 	int is = is1+is2;
 	 set<int> m;
 	 vector<bool> sign;
@@ -164,6 +167,7 @@ void readIntersection(){
 	 int last = 0;
 	 set<int>::iterator it;
 	 while(i < ics){
+		 if(((double)(clock() - tStart)/CLOCKS_PER_SEC) > timeLimit) break;
 		 while(m.size() < numI){
 			it = inter.begin();
 			advance(it,rand()%is);
@@ -203,11 +207,13 @@ void readIntersection(){
 			 set<int>::iterator itm = m.begin();
 			 for(int j =0; j < numI; j++){
 				 bool si = sign[j];
-				 if(si) outFP<< *itm<< ' ';
-				 else  outFP<< -*itm<< ' ';
+				 int v = *itm;
+				 if(si) clauseT.push_back(v);
+				 else  clauseT.push_back(-v);
 				 advance(itm,1);
 			 }
-			 outFP<<"0"<<endl;
+			 clauses.push_back(clauseT);
+			 clauseT.clear();
 			 i++;
 		 }
 		 sign.clear();
@@ -216,16 +222,45 @@ void readIntersection(){
 		 last = 0;
 		 m.clear();
 	 }
+	 ics = i;
+	 numCs += ics;
 	 assert(i == ics);
 }
-
+void parseLine(string line,int indexC){
+	char* str = strdup(line.c_str());
+    const char s[2] = " ";
+    int lit;
+    int size;
+    char* token = strtok(str, s);
+    while(token != NULL){
+		if(*token== '-'){
+			lit = atoi(token);
+			clauseT.push_back(lit);
+			token = strtok(NULL, s);
+			size++;
+			continue;
+		}
+		if(*token == '0'){
+			clauses.push_back(clauseT);
+			clauseT.clear();
+		    return;
+		}
+		lit = atoi(token);
+		clauseT.push_back(lit);
+	    size++;
+		token = strtok(NULL, s);
+    }
+	perror("a clause line does not terminates");
+	exit(EXIT_FAILURE);
+}
 void getClauses(int i){
 	if(i==1){
 		int line = 0;
 		while(!fp1.eof() && line < numC1){
 			getline(fp1,buff);
 			if(buff.empty()) break;
-			outFP<<buff<< endl;
+			parseLine(buff, line);
+			line++;
 		}
 	}
 	else{
@@ -234,29 +269,8 @@ void getClauses(int i){
 		while(!fp2.eof() && line < numC2){
 			getline(fp2,buff);
 			if(buff.empty()) break;
-			char* str = strdup(buff.c_str());
-			int lit;
-			bool flag;
-			char* token = strtok(str, s);
-			 while(token != NULL){
-				flag = false;
-				if(*token== '-'){
-					lit = -atoi(token);
-					outFP<<-(lit+numV1-1) << ' ';
-					token = strtok(NULL, s);
-					continue;
-				}
-				if(*token == '0'){
-					outFP<<'0'<<endl;
-					flag = true;
-					line++;
-					break;
-				}
-				if(flag) break;
-				lit = atoi(token);
-				outFP<<lit+numV1-1 << ' ';
-				token = strtok(NULL, s);
-			 }
+			parseLine(buff, line+numC1+ics);
+			line++;
 		}
 	}
 }
@@ -286,7 +300,7 @@ void test(){
    		i++;
 		testLine(buff);
    	}
-   	assert(i == numC+ics);
+   	assert(i == numCs);
    	fileName.erase(0,14);
    	cout<<fileName <<" tested" << endl;
    	fp.close();
@@ -320,9 +334,33 @@ void testLine(string line){
     cout<< line;
 	perror("a clause line does not terminates");
 	exit(EXIT_FAILURE);
+}
+void printClauses(){
+	assert(clauses.size() == numCs);
+	for(int i =0; i < numC1+ ics; i++){
+		printVector(clauses[i],0);
+
+	}
+	for(int i =ics+numC1; i < numCs; i++){
+		printVector(clauses[i],numV1-1);
+
+	}
 
 }
-
+void printVector(vector<int>& vec, int off){
+	for (std::vector<int>::const_iterator i = vec.begin(); i != vec.end(); ++i){
+		if((*i) > 0){
+			outFP << (*i)+off << ' ';
+			continue;
+		}
+		if((*i) < 0){
+			outFP << (*i)-off << ' ';
+			continue;
+		}
+		assert(false);
+	}
+	outFP<<'0'<< endl;
+}
 
 
 

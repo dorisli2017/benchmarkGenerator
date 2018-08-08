@@ -26,11 +26,12 @@ int numC1;
 int numV1;
 int numC2;
 int numV2;
-int numC;
-int numV;
+int numCs;
+int numVs;
 float alpha1;// percentage of cut variables of P1 variables.
 float alpha2;// percentage of cut variables of P2 variables.
 float alpha3;// percentage cut clauses in all clauses
+float timeLimit;// time limit to get the intersection clauses in seconds.
 ofstream outFP;
 string buff;
 vector<bool> assign;
@@ -46,10 +47,15 @@ void readFile_2();
 void combineFile();
 void setAssignment(string buff);
 void getClauses(int i);
+void parseLine(string line,int indexC);
 void setIntersection();
 void readIntersection();
 void testLine(string line);
 void test();
+vector<vector<int>> clauses;
+vector<int> clauseT;
+void printVector(vector<int>& vec, int off);
+void printClauses();
 
 
 
