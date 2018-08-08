@@ -123,7 +123,7 @@ void readFile_2(){
 	readIntersection();
 	getClauses(2);
 	outFP<<"p "<< numVs-1 << ' '<<numV1-1<< ' ' << numCs<< ' '<< numC1<< ' '<< numC1+ics<<endl;
-	outFP<<'i';
+	outFP<<'c';
 	 for (int const& iv : inter)
 	    {
 	        outFP <<' '<<iv;
@@ -289,7 +289,7 @@ void test(){
    	while(!fp.eof()){
    		if(buff.empty()) break;
 		head =buff.at(0);
-		if(head == 'i'){
+		if(head == 'c'){
 			break;
 		}
 	  getline(fp,buff);
