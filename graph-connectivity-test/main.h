@@ -19,17 +19,14 @@
 #include <algorithm>
 using namespace std;
 string fileName;
-ifstream fp1;// File 1 with assignment
-ifstream fp2;// File 2 with assignment
+int seed;
+int numFs;
 string l = "-";
-int numC1;
-int numV1;
-int numC2;
-int numV2;
 int numCs;
-int numVs;
-float alpha1;// percentage of cut variables of P1 variables.
-float alpha2;// percentage of cut variables of P2 variables.
+vector<int> numV;
+vector<int> offsetV;
+vector<int> offsetC;
+vector<int> numC;
 float alpha3;// percentage cut clauses in all clauses
 float timeLimit;// time limit to get the intersection clauses in seconds.
 ofstream outFP;
@@ -40,15 +37,10 @@ set<int> realinter;
 int is1;
 int is2;
 int ics;
-int seed = 1000;
 int numI = 3;
 const char s[2] = " ";
-void readFile_1();
-void readFile_2();
-void combineFile();
 void setAssignment(string buff);
-void getClauses(int i);
-void parseLine(string line,int indexC);
+void parseLine(string line,int indexC,int index);
 void setIntersection();
 void readIntersection();
 void testLine(string line);
