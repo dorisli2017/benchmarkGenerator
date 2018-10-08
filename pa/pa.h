@@ -21,15 +21,23 @@
 #include <random>
 #include <functional>
 using namespace std;
-
+string l = "-";
+char* fileName;
+string outFile;
 vector<vector<vector<int>>> clauses;
-vector<int> clauseT = {1,2,3};
-int pa = 2;
+vector<int> numC;
+vector<int> numV;
+int step;
+vector<int> clauseT;
+int pa;
+ofstream outFP;
 void printVector(vector<int>& vec);
 int numCs;
 int numVs;
 void memAllocate(string buff);
 void readFile(const char* fileName);
+void parseLine(string line);
+void printClauses();
 
 
 
