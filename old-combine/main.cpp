@@ -113,15 +113,9 @@ void readFile_2(){
 		}
 	  getline(fp2,buff);
 	}
-	/*outFP<< 's';
-	for(int i =1; i < numV; i++){
-		if(assign[i]) outFP <<' '<< i;
-		else outFP <<' '<< -i;
-	}*/
-
 	getClauses(1);
-	readIntersection();
 	getClauses(2);
+	readIntersection();
 	outFP<<"p "<< numVs-1 << ' '<<numV1-1<< ' ' << numCs<< ' '<< numC1<< ' '<< numC1+ics<<endl;
 	outFP<<'c';
 	 for (int const& iv : realinter)
@@ -149,88 +143,28 @@ void setIntersection(){
 	while(inter.size() != is1){
 		int c = rand()% numV1;
 		if(c== 0) continue;
-		inter.insert(c);
+		inter.push_back(c);
 	}
 	int is = is1+is2;
 	while(inter.size() != is){
-		inter.insert((rand()% numV2)+numV1);
+		inter.push_back((rand()% numV2)+numV1);
 	}
 }
 void readIntersection(){
-	clock_t tStart = clock();
 	int is = is1+is2;
-	 set<int> m;
-	 vector<bool> sign;
-	 int nump = 0;
+	clauseT.clear();
 	 int i = 0;
-	 int change = 0;
-	 int last = 0;
-	 set<int>::iterator it;
 	 while(i < ics){
-		 if(((double)(clock() - tStart)/CLOCKS_PER_SEC) > timeLimit) break;
-		 while(m.size() < numI){
-			it = inter.begin();
-			advance(it,rand()%is);
-			int c = *it;
-			if(last == 0){
-				if(c >= numV1) last = 2;
-				else last = 1;
-			}
-			if(c >= numV1 && last == 1){
-				last = 2;
-				change++;
-			}
-			if(c < numV1 && last == 2){
-				last = 1;
-				change++;
-			}
-			m.insert(c);
+		 clauseT.clear;
+		 int crit = rand()%numI;
+		 while(clauseT.size() < numI){
+			if(rand%2 == 0) clauseT.push_back(inter[rand()%is]);
+			else  clauseT.push_back(-inter[rand()%is]);
 		 }
-		for (int const& v :m)
-		{
-			bool c = (rand()%2 == 1);
-			sign.push_back(c);
-			if(c == assign[v]) nump++;
-		}
-		 if(change > 0){
-			 assert(*m.rbegin()>= numV1);
-			 assert(*m.begin()< numV1);
-			 if(nump == 0){
-				 int flip = rand()%numI;
-				 for(int i =0 ; i < numI; i++){
-					 if(i == flip) continue;
-					 sign[i] =  (rand()%2 == 1);
-				 }
-				 if(sign[flip]) sign[flip]= false;
-				 else sign[flip]= true;
-			 }
-			 set<int>::iterator itm = m.begin();
-			 for(int j =0; j < numI; j++){
-				 bool si = sign[j];
-				 int v = *itm;
-				 if(si){
-					 clauseT.push_back(v);
-					 realinter.insert(v);
-				 }
-				 else{
-					 clauseT.push_back(-v);
-					 realinter.insert(v);
-				 }
-				 advance(itm,1);
-			 }
-			 clauses.push_back(clauseT);
-			 clauseT.clear();
-			 i++;
-		 }
-		 sign.clear();
-		 nump = 0;
-		 change = 0;
-		 last = 0;
-		 m.clear();
+		 if(clauseT[crit] > 0 && assign[clauseT[crit]]<0) clauseT[crit]= -clauseT[crit];
+		 if(clauseT[crit] < 0 && assign[clauseT[crit]]>0) clauseT[crit]= -clauseT[crit];
+		 i++;
 	 }
-	 ics = i;
-	 numCs += ics;
-	 assert(i == ics);
 }
 void parseLine(string line,int indexC){
 	char* str = strdup(line.c_str());
