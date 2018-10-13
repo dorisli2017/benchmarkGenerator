@@ -1,11 +1,14 @@
 /*
- * main.cpp
- *
- *  Created on: Aug 1, 2018
- *      Author: ping
+ *file1 file2 <n1P> <n2P> <mP> seed timeLimit(for intersection)
+ *---------------------------------------
+ *c <command>
+ *c
+ *c
+ *c <seed>
+ *c intersection
+ *c <numP> <numVs> <numV1> ... <numCs> <numC1>.... <numCn>
  */
 #include "main.h"
-
 int main(int argc, char *argv[])
 {
 	seed = atof(argv[6]);
@@ -28,8 +31,10 @@ int main(int argc, char *argv[])
 	a.erase (0,32);
 	string b = string(argv[2]);
 	b.erase (0,32);
-	fileName = ("../../combine/"+a+ l + b +l + string(argv[3])+
+	fileName = "result";
+	/*fileName = ("../../combine/"+a+ l + b +l + string(argv[3])+
 			l + string(argv[4])+l + string(argv[5])+l + string(argv[6])).c_str();
+	*/
 	outFP.open(fileName,std:: ios::out);
 	if(!outFP.is_open()){
 		perror("write file fails!!!");
@@ -39,12 +44,17 @@ int main(int argc, char *argv[])
 	outFP.close();
 	fp1.close();
 	fp2.close();
-	test();
+	//test();
 }
 // append
 void combineFile(){
 	readFile_1();
 	readFile_2();
+	printSeed();
+	printInter();
+	outFP<<"c " << 2<<" " << numVs-1 <<" "<< numV1-1<< " "<< numV2<< " "<< numCs<< " "<< numC1 << " "<< numC2<<endl;
+	outFP<< "p" <<" "<< numVs-1<<" "<< numCs<<endl;
+	printClauses();
 }
 void readFile_1(){
 	// strat read
@@ -70,8 +80,9 @@ void readFile_1(){
 			char* str = strdup(buff.c_str());
 	    	strtok(str, s);
 			strtok(NULL, s);
-			numV1 = atoi(strtok(NULL, s))+1;
+			numV1 = atoi(strtok(NULL, s));
 			is1 = numV1* alpha1;
+			numV1++;
 			numC1 = atoi(strtok(NULL, s));
 			break;
 		}
@@ -113,17 +124,6 @@ void readFile_2(){
 		}
 	  getline(fp2,buff);
 	}
-	getClauses(1);
-	getClauses(2);
-	readIntersection();
-	outFP<<"p "<< numVs-1 << ' '<<numV1-1<< ' ' << numCs<< ' '<< numC1<< ' '<< numC1+ics<<endl;
-	outFP<<'c';
-	 for (int const& iv : realinter)
-	    {
-	        outFP <<' '<<iv;
-	    }
-	 outFP<< endl;
-	printClauses();
 }
 
 void setAssignment(string buff){
@@ -143,30 +143,90 @@ void setIntersection(){
 	while(inter.size() != is1){
 		int c = rand()% numV1;
 		if(c== 0) continue;
-		inter.push_back(c);
+		inter.insert(c);
 	}
 	int is = is1+is2;
 	while(inter.size() != is){
-		inter.push_back((rand()% numV2)+numV1);
+		inter.insert((rand()% numV2)+numV1);
 	}
 }
 void readIntersection(){
+	clock_t tStart = clock();
 	int is = is1+is2;
-	clauseT.clear();
+	 set<int> m;
+	 vector<bool> sign;
+	 int nump = 0;
 	 int i = 0;
+	 int change = 0;
+	 int last = 0;
+	 set<int>::iterator it;
 	 while(i < ics){
-		 clauseT.clear;
-		 int crit = rand()%numI;
-		 while(clauseT.size() < numI){
-			if(rand%2 == 0) clauseT.push_back(inter[rand()%is]);
-			else  clauseT.push_back(-inter[rand()%is]);
+		 if(((double)(clock() - tStart)/CLOCKS_PER_SEC) > timeLimit) break;
+		 while(m.size() < numI){
+			it = inter.begin();
+			advance(it,rand()%is);
+			int c = *it;
+			if(last == 0){
+				if(c >= numV1) last = 2;
+				else last = 1;
+			}
+			if(c >= numV1 && last == 1){
+				last = 2;
+				change++;
+			}
+			if(c < numV1 && last == 2){
+				last = 1;
+				change++;
+			}
+			m.insert(c);
 		 }
-		 if(clauseT[crit] > 0 && assign[clauseT[crit]]<0) clauseT[crit]= -clauseT[crit];
-		 if(clauseT[crit] < 0 && assign[clauseT[crit]]>0) clauseT[crit]= -clauseT[crit];
-		 i++;
+		for (int const& v :m)
+		{
+			bool c = (rand()%2 == 1);
+			sign.push_back(c);
+			if(c == assign[v]) nump++;
+		}
+		 if(change > 0){
+			 assert(*m.rbegin()>= numV1);
+			 assert(*m.begin()< numV1);
+			 if(nump == 0){
+				 int flip = rand()%numI;
+				 for(int i =0 ; i < numI; i++){
+					 if(i == flip) continue;
+					 sign[i] =  (rand()%2 == 1);
+				 }
+				 if(sign[flip]) sign[flip]= false;
+				 else sign[flip]= true;
+			 }
+			 set<int>::iterator itm = m.begin();
+			 for(int j =0; j < numI; j++){
+				 bool si = sign[j];
+				 int v = *itm;
+				 if(si){
+					 clauseT.push_back(v);
+					 realinter.insert(v);
+				 }
+				 else{
+					 clauseT.push_back(-v);
+					 realinter.insert(v);
+				 }
+				 advance(itm,1);
+			 }
+			// clauses.push_back(clauseT);
+			 clauseT.clear();
+			 i++;
+		 }
+		 sign.clear();
+		 nump = 0;
+		 change = 0;
+		 last = 0;
+		 m.clear();
 	 }
+	 ics = i;
+	 numCs += ics;
+	 assert(i == ics);
 }
-void parseLine(string line,int indexC){
+void parseLine(string line,int off){
 	char* str = strdup(line.c_str());
     const char s[2] = " ";
     int lit;
@@ -181,7 +241,7 @@ void parseLine(string line,int indexC){
 			continue;
 		}
 		if(*token == '0'){
-			clauses.push_back(clauseT);
+			printVector(clauseT,off);
 			clauseT.clear();
 		    return;
 		}
@@ -193,28 +253,6 @@ void parseLine(string line,int indexC){
 	perror("a clause line does not terminates");
 	exit(EXIT_FAILURE);
 }
-void getClauses(int i){
-	if(i==1){
-		int line = 0;
-		while(!fp1.eof() && line < numC1){
-			getline(fp1,buff);
-			if(buff.empty()) break;
-			parseLine(buff, line);
-			line++;
-		}
-	}
-	else{
-		// Get the clause
-		int line = 0;
-		while(!fp2.eof() && line < numC2){
-			getline(fp2,buff);
-			if(buff.empty()) break;
-			parseLine(buff, line+numC1+ics);
-			line++;
-		}
-	}
-}
-
 void test(){
 	ifstream fp;
 	int i = 0;
@@ -240,7 +278,7 @@ void test(){
    		i++;
 		testLine(buff);
    	}
-   	assert(i == numCs);
+   //	assert(i == numCs);
    	fileName.erase(0,14);
    	cout<<fileName <<" tested" << endl;
    	fp.close();
@@ -275,18 +313,7 @@ void testLine(string line){
 	perror("a clause line does not terminates");
 	exit(EXIT_FAILURE);
 }
-void printClauses(){
-	assert(clauses.size() == numCs);
-	for(int i =0; i < numC1+ ics; i++){
-		printVector(clauses[i],0);
 
-	}
-	for(int i =ics+numC1; i < numCs; i++){
-		printVector(clauses[i],numV1-1);
-
-	}
-
-}
 void printVector(vector<int>& vec, int off){
 	for (std::vector<int>::const_iterator i = vec.begin(); i != vec.end(); ++i){
 		if((*i) > 0){
@@ -301,6 +328,36 @@ void printVector(vector<int>& vec, int off){
 	}
 	outFP<<'0'<< endl;
 }
-
-
-
+void printSeed(){
+	outFP<<"c ";
+	for(int i = 0; i < numVs; i++){
+		if(assign[i]) outFP<< i<<" ";
+		else  outFP<< -i<<" ";
+	}
+	outFP<< endl;
+}
+void printInter(){
+	outFP<<"c ";
+	for(int const& i:inter){
+		outFP<<i<<" ";
+	}
+	outFP<< endl;
+}
+void printClauses(){
+	int line = 0;
+	while(!fp1.eof()){
+		getline(fp1,buff);
+		if(buff.empty()) break;
+		parseLine(buff, 0);
+		line++;
+	}
+	assert(line == numC1);
+	line = 0;
+	while(!fp2.eof()){
+		getline(fp2,buff);
+		if(buff.empty()) break;
+		parseLine(buff, numV1-1);
+		line++;
+	}
+	assert(line == numC2);
+}
