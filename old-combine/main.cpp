@@ -31,10 +31,7 @@ int main(int argc, char *argv[])
 	a.erase (0,32);
 	string b = string(argv[2]);
 	b.erase (0,32);
-	fileName = "result";
-	/*fileName = ("../../combine/"+a+ l + b +l + string(argv[3])+
-			l + string(argv[4])+l + string(argv[5])+l + string(argv[6])).c_str();
-	*/
+	fileName = (a+ l + b +l + string(argv[3])+l + string(argv[4])+l + string(argv[5])+l + string(argv[6])).c_str();
 	outFP.open(fileName,std:: ios::out);
 	if(!outFP.is_open()){
 		perror("write file fails!!!");
@@ -53,7 +50,7 @@ void combineFile(){
 	printSeed();
 	printInter();
 	outFP<<"c " << 2<<" " << numVs-1 <<" "<< numV1-1<< " "<< numV2<< " "<< numCs<< " "<< numC1 << " "<< numC2<<endl;
-	outFP<< "p" <<" "<< numVs-1<<" "<< numCs<<endl;
+	outFP<< "p cnf " <<" "<< numVs-1<<" "<< numCs<<endl;
 	printClauses();
 }
 void readFile_1(){
